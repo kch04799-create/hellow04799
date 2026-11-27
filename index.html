@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>웹앱 & 자료 게시판</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --badge-bg: #eff6ff;
+      --badge-text: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .btn-open {
+      background: #eff6ff;
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+      padding: 6px 12px;
+      font-size: 0.82rem;
+    }
+
+    .btn-open:hover {
+      background: #dbeafe;
+    }
+
+    .btn-del {
+      background: transparent;
+      color: #94a3b8;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+    }
+
+    .btn-del:hover {
+      color: #dc2626;
+      background: #fef2f2;
+    }
+
+    /* 필터 & 검색 바 */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .search-input {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      min-width: 210px;
+      background: var(--card);
+    }
+
+    /* 새 항목 추가 카드 */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .card.hidden {
+      display: none;
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* 게시판 리스트 테이블 */
+    .board-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 13px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      font-size: 0.84rem;
+      color: #334155;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+    }
+
+    .item-title {
+      font-weight: 600;
+      color: var(--text);
+      display: block;
+    }
+
+    .item-url {
+      font-size: 0.78rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .action-cell {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .empty-row {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      th:nth-child(1), td:nth-child(1),
+      th:nth-child(4), td:nth-child(4) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>📌 QR 웹앱 & 자료 리스트 게시판</h1>
+        <p>생성한 QR 웹앱과 업로드된 링크·자료를 한눈에 모아서 바로 여는 인덱스 페이지입니다.</p>
+      </div>
+      <button class="btn btn-primary" onclick="toggleAddForm()">+ 항목 추가</button>
+    </header>
+
+    <!-- 항목 추가 폼 -->
+    <section id="addCard" class="card hidden">
+      <h2>새 웹앱 / 링크 항목 등록</h2>
+      <div class="form-grid">
+        <select id="itemType">
+          <option value="QR웹앱">QR웹앱</option>
+          <option value="이미지">이미지</option>
+          <option value="링크">링크</option>
+        </select>
+        <input type="text" id="itemTitle" placeholder="항목 제목 (예: 행사 안내 QR 생성기)" />
+      </div>
+      <input
+        type="text"
+        id="itemUrl"
+        placeholder="이동할 경로 또는 URL (예: ./QR/ 또는 https://example.com)"
+      />
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="toggleAddForm()">취소</button>
+        <button class="btn btn-primary" onclick="addItem()">목록에 추가</button>
+      </div>
+    </section>
+
+    <!-- 필터 & 검색 -->
+    <div class="toolbar">
+      <div class="filter-group">
+        <button class="filter-btn active" onclick="setFilter('전체', this)">전체</button>
+        <button class="filter-btn" onclick="setFilter('QR웹앱', this)">QR웹앱</button>
+        <button class="filter-btn" onclick="setFilter('이미지', this)">이미지</button>
+        <button class="filter-btn" onclick="setFilter('링크', this)">링크</button>
+      </div>
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="제목 또는 링크 검색..."
+        oninput="renderList()"
+      />
+    </div>
+
+    <!-- 게시판 리스트 -->
+    <div class="board-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 64px;">번호</th>
+            <th style="width: 96px;">구분</th>
+            <th>제목 및 주소</th>
+            <th style="width: 110px;">등록일</th>
+            <th style="width: 120px; text-align: right;">바로가기</th>
+          </tr>
+        </thead>
+        <tbody id="listBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "gh_pages_qr_board_items_v1";
+
+    const defaultItems = [
+      {
+        id: 1,
+        type: "QR웹앱",
+        title: "QR 생성·리더 & 이미지 링크 웹앱",
+        url: "https://kch04799-create.github.io/hellow04799/QR/",
+        date: "2026-11-27"
+      },
+      {
+        id: 2,
+        type: "이미지",
+        title: "둥이.png (저장소 업로드 이미지)",
+        url: "https://kch04799-create.github.io/hellow04799/%EB%91%A5%EC%9D%B4.png",
+        date: "2026-11-27"
+      }
+    ];
+
+    let items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultItems;
+    let currentFilter = "전체";
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function toggleAddForm() {
+      document.getElementById("addCard").classList.toggle("hidden");
+    }
+
+    function setFilter(category, btnEl) {
+      currentFilter = category;
+      document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+      btnEl.classList.add("active");
+      renderList();
+    }
+
+    function addItem() {
+      const type = document.getElementById("itemType").value;
+      const title = document.getElementById("itemTitle").value.trim();
+      const url = document.getElementById("itemUrl").value.trim();
+
+      if (!title || !url) {
+        alert("제목과 이동할 URL(또는 경로)을 입력해주세요.");
+        return;
+      }
+
+      const today = new Date().toISOString().split("T")[0];
+      items.push({
+        id: Date.now(),
+        type,
+        title,
+        url,
+        date: today
+      });
+
+      saveItems();
+      renderList();
+
+      document.getElementById("itemTitle").value = "";
+      document.getElementById("itemUrl").value = "";
+      toggleAddForm();
+    }
+
+    function deleteItem(id) {
+      if (!confirm("이 항목을 목록에서 삭제할까요?")) return;
+      items = items.filter(item => item.id !== id);
+      saveItems();
+      renderList();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderList() {
+      const tbody = document.getElementById("listBody");
+      const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      const filtered = items.filter(item => {
+        const matchCategory = currentFilter === "전체" || item.type === currentFilter;
+        const matchKeyword =
+          !keyword ||
+          item.title.toLowerCase().includes(keyword) ||
+          item.url.toLowerCase().includes(keyword);
+        return matchCategory && matchKeyword;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-row">표시할 항목이 없습니다.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = "";
+      [...filtered].reverse().forEach((item, idx) => {
+        const num = filtered.length - idx;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${num}</td>
+          <td><span class="badge">${escapeHtml(item.type)}</span></td>
+          <td>
+            <span class="item-title">${escapeHtml(item.title)}</span>
+            <span class="item-url">${escapeHtml(item.url)}</span>
+          </td>
+          <td style="font-size: 0.84rem; color: var(--muted);">${escapeHtml(item.date)}</td>
+          <td>
+            <div class="action-cell">
+              <a class="btn btn-open" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">열기</a>
+              <button class="btn btn-del" onclick="deleteItem(${item.id})" title="삭제">✕</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    renderList();
+  </script>
+</body>
+</html>
