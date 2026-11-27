@@ -41,14 +41,31 @@
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       margin-bottom: 20px;
       padding-bottom: 16px;
       border-bottom: 2px solid var(--border);
     }
 
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .user-emoji-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      background-color: #e2e8f0;
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.16);
+      flex-shrink: 0;
+    }
+
     header h1 {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 700;
     }
 
@@ -284,9 +301,17 @@
 <body>
   <div class="container">
     <header>
-      <div>
-        <h1>📌 웹앱 & 자료 리스트 게시판</h1>
-        <p>생성한 웹앱과 업로드된 링크·자료를 한눈에 모아서 바로 여는 인덱스 페이지입니다.</p>
+      <div class="header-brand">
+        <img
+          src="./kch.png"
+          alt="사용자 이모지 프로필"
+          class="user-emoji-avatar"
+          onerror="this.src='./%EB%91%A5%EC%9D%B4.png';"
+        />
+        <div>
+          <h1>웹앱 & 자료 리스트 게시판</h1>
+          <p>생성한 웹앱과 업로드된 링크·자료를 한눈에 모아서 바로 여는 인덱스 페이지입니다.</p>
+        </div>
       </div>
       <button class="btn btn-primary" onclick="toggleAddForm()">+ 항목 추가</button>
     </header>
@@ -350,7 +375,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "gh_pages_qr_board_items_v2";
+    const STORAGE_KEY = "gh_pages_qr_board_items_v3";
 
     const defaultItems = [
       {
