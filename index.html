@@ -285,8 +285,8 @@
   <div class="container">
     <header>
       <div>
-        <h1>📌 QR 웹앱 & 자료 리스트 게시판</h1>
-        <p>생성한 QR 웹앱과 업로드된 링크·자료를 한눈에 모아서 바로 여는 인덱스 페이지입니다.</p>
+        <h1>📌 웹앱 & 자료 리스트 게시판</h1>
+        <p>생성한 웹앱과 업로드된 링크·자료를 한눈에 모아서 바로 여는 인덱스 페이지입니다.</p>
       </div>
       <button class="btn btn-primary" onclick="toggleAddForm()">+ 항목 추가</button>
     </header>
@@ -297,6 +297,7 @@
       <div class="form-grid">
         <select id="itemType">
           <option value="QR웹앱">QR웹앱</option>
+          <option value="정산웹앱">정산웹앱</option>
           <option value="이미지">이미지</option>
           <option value="링크">링크</option>
         </select>
@@ -318,6 +319,7 @@
       <div class="filter-group">
         <button class="filter-btn active" onclick="setFilter('전체', this)">전체</button>
         <button class="filter-btn" onclick="setFilter('QR웹앱', this)">QR웹앱</button>
+        <button class="filter-btn" onclick="setFilter('정산웹앱', this)">정산웹앱</button>
         <button class="filter-btn" onclick="setFilter('이미지', this)">이미지</button>
         <button class="filter-btn" onclick="setFilter('링크', this)">링크</button>
       </div>
@@ -348,7 +350,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "gh_pages_qr_board_items_v1";
+    const STORAGE_KEY = "gh_pages_qr_board_items_v2";
 
     const defaultItems = [
       {
@@ -363,6 +365,13 @@
         type: "이미지",
         title: "둥이.png (저장소 업로드 이미지)",
         url: "https://kch04799-create.github.io/hellow04799/%EB%91%A5%EC%9D%B4.png",
+        date: "2026-11-27"
+      },
+      {
+        id: 3,
+        type: "정산웹앱",
+        title: "간단 견적·정산 계산기",
+        url: "https://kch04799-create.github.io/hellow04799/split/",
         date: "2026-11-27"
       }
     ];
