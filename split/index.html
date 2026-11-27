@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>간단 견적·정산 계산기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --panel: #ffffff;
+      --navy: #0b1f4b;
+      --ink: #0b1630;
+      --muted: #55607a;
+      --line: #d5dbe8;
+      --acc: #e0115f;
+      --acc-hover: #c20d51;
+      --soft-acc: #fde7ef;
+      --soft-blue: #eef3fc;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+    }
+
+    header {
+      background: var(--navy);
+      color: #ffffff;
+      padding: 28px 20px;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    header p {
+      margin: 0;
+      color: #dbe4fa;
+      font-size: 14px;
+    }
+
+    main {
+      padding: 24px 20px 60px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 14px -10px rgba(11, 31, 75, 0.2);
+    }
+
+    .card-title {
+      margin: 0 0 14px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 탭 버튼 */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: var(--bg);
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      margin-bottom: 18px;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--navy);
+      box-shadow: 0 2px 6px rgba(11, 31, 75, 0.08);
+    }
+
+    /* 입력 폼 공통 */
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--ink);
+      background: #ffffff;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--acc);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 540px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* 항목 리스트 */
+    .item-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 38px;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .btn-del {
+      height: 40px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--muted);
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-del:hover {
+      background: var(--soft-acc);
+      color: var(--acc);
+      border-color: var(--acc);
+    }
+
+    .btn-add {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      border: 1px dashed var(--acc);
+      background: var(--soft-acc);
+      color: var(--acc);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-add:hover {
+      background: #fbd5e3;
+    }
+
+    /* 결과 하이라이트 박스 */
+    .result-box {
+      background: var(--soft-blue);
+      border: 1px solid #cddaf5;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .result-row:last-child {
+      margin-bottom: 0;
+      padding-top: 10px;
+      border-top: 1px dashed #b9c9eb;
+    }
+
+    .result-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .result-val {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .result-highlight {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--acc);
+    }
+
+    .sub-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    /* 메시지 미리보기 & 복사 버튼 */
+    textarea#noticePreview {
+      min-height: 170px;
+      resize: vertical;
+      background: #fafbfe;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: var(--acc);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--acc-hover);
+    }
+
+    .btn-reset {
+      padding: 13px 18px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-reset:hover {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .hidden { display: none; }
+
+    /* 토스트 알림 */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--navy);
+      color: #ffffff;
+      padding: 12px 22px;
+      border-radius: 99px;
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>간단 견적·정산 계산기</h1>
+      <p>항목별 내역 또는 총액을 입력하면 1인당 정산 금액과 공유 문구를 자동으로 만들어 드립니다.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <!-- 1. 기본 정보 & 금액 입력 -->
+      <section class="card">
+        <div class="card-title">
+          <span>1. 비용 내역 입력</span>
+        </div>
+
+        <div class="tabs">
+          <button type="button" class="tab-btn active" id="tabItems" onclick="switchMode('items')">항목별 여러 줄 입력</button>
+          <button type="button" class="tab-btn" id="tabTotal" onclick="switchMode('total')">총액만 바로 입력</button>
+        </div>
+
+        <!-- 모드 A: 항목별 입력 -->
+        <div id="modeItems">
+          <div id="itemList"></div>
+          <button type="button" class="btn-add" onclick="addItemRow()">+ 항목 추가하기</button>
+        </div>
+
+        <!-- 모드 B: 총액 직접 입력 -->
+        <div id="modeTotal" class="hidden">
+          <label for="directTotal">전체 총액 (원)</label>
+          <input type="number" id="directTotal" placeholder="예: 125000" min="0" step="100" oninput="calculate()">
+        </div>
+      </section>
+
+      <!-- 2. 정산 옵션 & 계좌 정보 -->
+      <section class="card">
+        <div class="card-title">
+          <span>2. 인원 및 정산 옵션</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label for="peopleCount">정산 인원 수 (명)</label>
+            <input type="number" id="peopleCount" value="4" min="1" max="500" oninput="calculate()">
+          </div>
+          <div>
+            <label for="roundUnit">금액 올림 단위</label>
+            <select id="roundUnit" onchange="calculate()">
+              <option value="1">1원 단위 (정확히 나누기)</option>
+              <option value="10">10원 단위 올림</option>
+              <option value="100" selected>100원 단위 올림 (추천)</option>
+              <option value="1000">1,000원 단위 올림</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 0;">
+          <div>
+            <label for="eventTitle">모임 / 행사명 (선택)</label>
+            <input type="text" id="eventTitle" placeholder="예: 11월 정기 모임 / 워크숍" oninput="calculate()">
+          </div>
+          <div>
+            <label for="accountInfo">입금 계좌 정보 (선택)</label>
+            <input type="text" id="accountInfo" placeholder="예: 카카오뱅크 3333-00-0000000 홍길동" oninput="calculate()">
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 정산 결과 & 안내 문구 -->
+      <section class="card">
+        <div class="card-title">
+          <span>3. 정산 결과 및 안내 문구</span>
+        </div>
+
+        <div class="result-box">
+          <div class="result-row">
+            <span class="result-label">총 합계 금액</span>
+            <span class="result-val" id="resTotal">0원</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">정산 인원</span>
+            <span class="result-val" id="resPeople">4명</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">1인당 정산 금액</span>
+            <span class="result-highlight" id="resPerPerson">0원</span>
+          </div>
+          <div class="sub-note" id="resDiffNote"></div>
+        </div>
+
+        <label for="noticePreview">자동 생성된 정산 안내 문구 (수정 가능)</label>
+        <textarea id="noticePreview"></textarea>
+
+        <div class="btn-group">
+          <button type="button" class="btn-primary" onclick="copyNotice()">정산 안내 문구 복사하기</button>
+          <button type="button" class="btn-reset" onclick="resetAll()">초기화</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">클립보드에 복사되었습니다!</div>
+
+  <script>
+    let currentMode = 'items';
+
+    // 초기 예시 항목 세팅
+    const defaultItems = [
+      { name: '1차 식사', price: 68000 },
+      { name: '2차 카페·음료', price: 24500 }
+    ];
+
+    function init() {
+      const list = document.getElementById('itemList');
+      list.innerHTML = '';
+      defaultItems.forEach(item => addItemRow(item.name, item.price));
+      calculate();
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('tabItems').classList.toggle('active', mode === 'items');
+      document.getElementById('tabTotal').classList.toggle('active', mode === 'total');
+      document.getElementById('modeItems').classList.toggle('hidden', mode !== 'items');
+      document.getElementById('modeTotal').classList.toggle('hidden', mode !== 'total');
+      calculate();
+    }
+
+    function addItemRow(name = '', price = '') {
+      const list = document.getElementById('itemList');
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <input type="text" class="item-name" placeholder="항목명 (예: 대관료, 다과)" value="${name}" oninput="calculate()">
+        <input type="number" class="item-price" placeholder="금액 (원)" min="0" step="100" value="${price}" oninput="calculate()">
+        <button type="button" class="btn-del" title="삭제" onclick="removeItemRow(this)">✕</button>
+      `;
+      list.appendChild(row);
+      calculate();
+    }
+
+    function removeItemRow(btn) {
+      const list = document.getElementById('itemList');
+      if (list.children.length <= 1) {
+        btn.parentElement.querySelector('.item-name').value = '';
+        btn.parentElement.querySelector('.item-price').value = '';
+      } else {
+        btn.parentElement.remove();
+      }
+      calculate();
+    }
+
+    function formatWon(num) {
+      return Math.round(num).toLocaleString('ko-KR') + '원';
+    }
+
+    function calculate() {
+      let total = 0;
+      let itemLines = [];
+
+      if (currentMode === 'items') {
+        const rows = document.querySelectorAll('#itemList .item-row');
+        rows.forEach((row, idx) => {
+          const nameInput = row.querySelector('.item-name').value.trim();
+          const priceVal = Number(row.querySelector('.item-price').value) || 0;
+          total += priceVal;
+
+          if (nameInput || priceVal > 0) {
+            const label = nameInput || `항목 ${idx + 1}`;
+            itemLines.push(`· ${label}: ${formatWon(priceVal)}`);
+          }
+        });
+      } else {
+        total = Number(document.getElementById('directTotal').value) || 0;
+      }
+
+      const people = Math.max(1, parseInt(document.getElementById('peopleCount').value, 10) || 1);
+      const unit = parseInt(document.getElementById('roundUnit').value, 10) || 1;
+
+      const exactPerPerson = total / people;
+      const perPerson = unit === 1
+        ? Math.ceil(exactPerPerson)
+        : Math.ceil(exactPerPerson / unit) * unit;
+
+      const collectedTotal = perPerson * people;
+      const diff = collectedTotal - total;
+
+      // 상단 결과 요약 업데이트
+      document.getElementById('resTotal').textContent = formatWon(total);
+      document.getElementById('resPeople').textContent = `${people}명`;
+      document.getElementById('resPerPerson').textContent = formatWon(perPerson);
+
+      const diffNote = document.getElementById('resDiffNote');
+      if (total > 0 && diff > 0) {
+        diffNote.textContent = `* ${unit.toLocaleString()}원 단위 올림 적용 (총 수금액 ${formatWon(collectedTotal)}, 차액 +${formatWon(diff)})`;
+      } else {
+        diffNote.textContent = '';
+      }
+
+      // 정산 안내 문구 조립
+      const title = document.getElementById('eventTitle').value.trim() || '모임 비용 정산 안내';
+      const account = document.getElementById('accountInfo').value.trim();
+
+      let text = `[${title}]\n`;
+      if (currentMode === 'items' && itemLines.length > 0) {
+        text += `\n■ 상세 내역\n${itemLines.join('\n')}\n`;
+      }
+      text += `\n■ 정산 요약\n`;
+      text += `· 총 금액: ${formatWon(total)}\n`;
+      text += `· 인원 수: ${people}명\n`;
+      text += `· 1인당 입금액: ${formatWon(perPerson)}`;
+
+      if (account) {
+        text += `\n\n■ 입금 계좌\n${account}`;
+      }
+
+      document.getElementById('noticePreview').value = text;
+    }
+
+    function copyNotice() {
+      const textarea = document.getElementById('noticePreview');
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textarea.value).then(showToast);
+      } else {
+        document.execCommand('copy');
+        showToast();
+      }
+    }
+
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function resetAll() {
+      document.getElementById('directTotal').value = '';
+      document.getElementById('peopleCount').value = '4';
+      document.getElementById('roundUnit').value = '100';
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('accountInfo').value = '';
+
+      const list = document.getElementById('itemList');
+      list.innerHTML = '';
+      addItemRow('', '');
+      addItemRow('', '');
+      calculate();
+    }
+
+    init();
+  </script>
+</body>
+</html>
